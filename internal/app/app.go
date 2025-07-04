@@ -3,11 +3,18 @@ package app
 import (
 	"fmt"
 
-	"github.com/k-morozov/social/internal/service/http_service"
+	"github.com/k-morozov/social/internal/service"
 )
 
 func Run() {
-	fmt.Println("Hello world!")
+	srv, err := service.NewServiceHTTP(service.OptionLogger())
+	if err != nil {
+		fmt.Println("Failed: {}", err)
+		return
+	}
 
-	server, err := http_service.NewServiceHTTP()
+	if err = srv.ListenAndServe(); err != nil {
+		fmt.Println("Failed: {}", err)
+		return
+	}
 }
