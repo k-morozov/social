@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,7 +21,6 @@ type ServiceHTTPOption func(s *ServiceHTTP)
 func NewServiceHTTP(opts ...ServiceHTTPOption) (*ServiceHTTP, error) {
 	srv := &ServiceHTTP{
 		engine: echo.New(),
-		api:    api.NewSocailAPI(),
 	}
 
 	for _, opt := range opts {
@@ -33,13 +31,6 @@ func NewServiceHTTP(opts ...ServiceHTTPOption) (*ServiceHTTP, error) {
 }
 
 func (s *ServiceHTTP) ListenAndServe() error {
-
-	s.engine.POST("/user/register", func(c echo.Context) error {
-		fmt.Println("Call register")
-		s.api.Register(c.Response().Writer, c.Request())
-		return nil
-	})
-
 	s.server = &http.Server{
 		Addr:    ":8080",
 		Handler: s.engine,

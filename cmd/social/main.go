@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	srv, err := service.NewServiceHTTP(service.OptionLogger())
+	srv, err := service.NewServiceHTTP(
+		service.OptionSocial(),
+		service.OptionLogger(),
+	)
 	if err != nil {
 		fmt.Println("Failed: {}", err)
 		return
