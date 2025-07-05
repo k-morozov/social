@@ -1,9 +1,20 @@
 package main
 
 import (
-	"github.com/k-morozov/social/internal/app"
+	"fmt"
+
+	"github.com/k-morozov/social/internal/service"
 )
 
 func main() {
-	app.Run()
+	srv, err := service.NewServiceHTTP(service.OptionLogger())
+	if err != nil {
+		fmt.Println("Failed: {}", err)
+		return
+	}
+
+	if err = srv.ListenAndServe(); err != nil {
+		fmt.Println("Failed: {}", err)
+		return
+	}
 }
