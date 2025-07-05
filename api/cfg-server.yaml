@@ -1,0 +1,4 @@
+package: api
+output: restapi/server.go
+generate:
+  echo-server: true

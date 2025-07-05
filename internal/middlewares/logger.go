@@ -6,9 +6,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/k-morozov/social/internal/log"
+	"github.com/rs/zerolog"
 )
 
 type doubleWriter struct {
@@ -24,36 +23,15 @@ func (w *doubleWriter) Write(b []byte) (int, error) {
 	return w.Writer.Write(b)
 }
 
-func OptionLogger() ServiceHTTPOption {
-	return func(s *ServiceHTTP) {
-		withLogger(s)
-	}
-}
-
-func withLogger(s *ServiceHTTP) {
-	s.logger = log.NewLogger("debug")
-
-	s.engine.Use(logResponse(s))
-	s.engine.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
-		LogMethod: true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			s.logger.Info().
-				Str("method", v.Method).
-				Str("URI", v.URI).
-				Int("status", v.Status).
-				Msg("request")
-
-			return nil
-		},
-	}))
-}
-
-func logResponse(s *ServiceHTTP) echo.MiddlewareFunc {
+func ZerologMiddleware(logger zerolog.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		s.logger.Debug().Msg("Call LogResponse")
 		return func(c echo.Context) error {
+
+			logger.Info().
+				Str("method", c.Request().Method).
+				Str("URI", c.Request().RequestURI).
+				Str("remote addr", c.Request().RemoteAddr).
+				Msg("request")
 
 			buffer := new(bytes.Buffer)
 			writer := io.MultiWriter(c.Response().Writer, buffer)
@@ -67,7 +45,7 @@ func logResponse(s *ServiceHTTP) echo.MiddlewareFunc {
 				c.Error(err)
 			}
 
-			s.logger.Info().
+			logger.Info().
 				Int("status", c.Response().Status).
 				Str("body", buffer.String()).
 				Msg("response")

@@ -1,20 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"io"
 
+	"github.com/labstack/echo/v4"
+
+	openapi "github.com/k-morozov/social/api/restapi"
+	"github.com/k-morozov/social/internal/log"
+	mware "github.com/k-morozov/social/internal/middlewares"
 	"github.com/k-morozov/social/internal/service"
 )
 
 func main() {
-	srv, err := service.NewServiceHTTP(service.OptionLogger())
-	if err != nil {
-		fmt.Println("Failed: {}", err)
-		return
-	}
+	logger := log.NewLogger("debug")
+	e := echo.New()
 
-	if err = srv.ListenAndServe(); err != nil {
-		fmt.Println("Failed: {}", err)
-		return
-	}
+	// e.Use(middleware.Recover())
+	// e.Use(middleware.CORS())
+
+	e.Logger.SetOutput(io.Discard)
+	e.Use(mware.ZerologMiddleware(logger))
+
+	server := service.NewSocial(logger)
+
+	openapi.RegisterHandlers(e, server)
+
+	e.Logger.Fatal(e.Start(":8080"))
 }
