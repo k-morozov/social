@@ -21,7 +21,6 @@ func NewLogger(level string) zerolog.Logger {
 	return zerolog.New(multi).Level(loggerLevel).With().Timestamp().Logger()
 }
 
-// create default logger
 func DefaultLogger() zerolog.Logger {
 	return NewLogger("info")
 }
